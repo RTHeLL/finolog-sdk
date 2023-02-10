@@ -1,4 +1,4 @@
-# Onlinesim Python API
+# Finolog Python API
 
 Wrapper for working with Finolog service API
 
