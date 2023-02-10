@@ -2,6 +2,8 @@
 
 Wrapper for working with Finolog service API
 
+[![N|Solid](https://img.shields.io/pypi/pyversions/finolog-sdk.svg)](https://pypi.python.org/pypi/finolog-sdk)
+
 ### Installation
 You can install or upgrade package with:
 ```
