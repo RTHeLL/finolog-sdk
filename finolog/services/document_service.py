@@ -34,12 +34,29 @@ class FinologDocumentService(FinologAPIService):
         asset - отгрузка по средствам, если kind равен shipment
         """
 
+        self.validate_payload(
+            payload=payload,
+            types={
+                'page': int,
+                'pagesize': int,
+                'query': str,
+                'item_id': int,
+                'kind': str,
+                'template': str
+            }
+        )
+
         response = self.request('GET', self.uri, payload)
 
         return [Document(**obj) for obj in response]
 
     def get_document(self, id_: int) -> Document:
-        self.__validate_document_id(id_)
+        self.validate_payload(
+            payload={'id': id_},
+            types={
+                'id': int
+            }
+        )
 
         return Document(**self.request('GET', f'{self.uri}/{str(id_)}'))
 
@@ -51,10 +68,19 @@ class FinologDocumentService(FinologAPIService):
         no_sign: bool : Don't show print and signature in generated pdf
         """
 
-        self.__validate_document_id(id_)
+        payload_copy = payload.copy()
+        payload_copy['id'] = id_
+
+        self.validate_payload(
+            payload=payload_copy,
+            types={
+                'id': int,
+                'no_sign': bool
+            }
+        )
 
         if 'no_sign' in payload:
-            payload['no_sign'] = 'true' if payload['no_sign'] == True else 'false'
+            payload['no_sign'] = 'true' if payload['no_sign'] is True else 'false'
 
         return DocumentPDF(**self.request('GET', f'{self.uri}/{str(id_)}/pdf/invoice', payload))
 
@@ -96,6 +122,46 @@ class FinologDocumentService(FinologAPIService):
         ]
         """
 
+        if 'items' not in payload:
+            raise ValueError('items not specified')
+
+        self.validate_payload(
+            payload=payload,
+            types={
+                'kind': str,
+                'vat_type': str,
+                'type': str,
+                'date': str,
+                'template': str,
+                'from_contractor_id': int,
+                'from_requisite_id': int,
+                'to_contractor_id': int,
+                'to_requisite_id': int,
+                'to_contractor_draft': str,
+                'number': str,
+                'status': str,
+                'comment': str,
+                'description': str,
+                'model_type': str,
+                'model_id': int,
+                'items': list
+            }
+        )
+
+        self.validate_payload(
+            payload=payload['items'],
+            types={
+                'id': int,
+                'item_id': int,
+                'count': int,
+                'vat': int,
+                'price': int,
+                'price_currency_id': int,
+                'amortization': int,
+                'item_name': str
+            }
+        )
+
         return Document(**self.request('POST', self.uri, payload=payload))
 
     def update_document(self, id_: int, **payload) -> Document:
@@ -121,21 +187,40 @@ class FinologDocumentService(FinologAPIService):
         model_id: int : ID of the model to which the document will be linked
         """
 
-        self.__validate_document_id(id_)
+        payload_copy = payload.copy()
+        payload_copy['id'] = id_
+
+        self.validate_payload(
+            payload=payload_copy,
+            types={
+                'type': str,
+                'kind': str,
+                'date': str,
+                'template': str,
+                'from_contractor_id': int,
+                'from_requisite_id': int,
+                'to_contractor_id': int,
+                'to_requisite_id': int,
+                'to_contractor_draft': str,
+                'number': str,
+                'status': str,
+                'comment': str,
+                'description': str,
+                'model_type': str,
+                'model_id': int
+            }
+        )
 
         response = self.request('PUT', f'{self.uri}/{str(id_)}', payload)
 
         return Document(**response)
 
     def delete_document(self, id_: int) -> Document:
-        self.__validate_document_id(id_)
+        self.validate_payload(
+            payload={'id': id_},
+            types={
+                'id': int
+            }
+        )
 
         return Document(**self.request('DELETE', f'{self.uri}/{str(id_)}'))
-
-    def __validate_payload(self):
-        pass
-
-    @staticmethod
-    def __validate_document_id(id_: int):
-        if not isinstance(id_, int):
-            raise TypeError('id_ must be a number')

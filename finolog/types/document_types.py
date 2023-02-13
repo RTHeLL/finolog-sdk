@@ -81,7 +81,7 @@ class DocumentFromContractor(BaseModel):
     updated_at: datetime
     created_by_id: int
     updated_by_id: int
-    deleted_at: datetime
+    deleted_at: Optional[datetime]
     deleted_by_id: Any
     alien_id: Any
     is_bizzed: bool
@@ -109,7 +109,7 @@ class DocumentFromRequisite(BaseModel):
     updated_at: datetime
     created_by_id: int
     updated_by_id: int
-    deleted_at: datetime
+    deleted_at: Optional[datetime]
     deleted_by_id: Any
     email: Any
     web: Any
@@ -145,7 +145,7 @@ class DocumentToContractor(BaseModel):
     updated_at: datetime
     created_by_id: int
     updated_by_id: int
-    deleted_at: datetime
+    deleted_at: Optional[datetime]
     deleted_by_id: Any
     alien_id: Any
     is_bizzed: bool
