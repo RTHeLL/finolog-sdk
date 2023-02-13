@@ -22,13 +22,17 @@ $ pip install git+https://github.com/RTHeLL/finolog-sdk
 ### Example
 
 ```python
-from finolog.services import FinologService 
+from finolog.client import FinologClient 
 
 
 def main():
-    client = FinologService(api_token='YOUR TOKEN', biz_id=123)
+    client = FinologClient(api_token='YOUR TOKEN', biz_id=123)
+    contractors = client.contractor.get_contractors()
     documents = client.document.get_documents()
-    print(documents)
+    print(
+        f'Documents: {documents}\n'
+        f'Contractors: {contractors}'
+    )
 
 
 main()
