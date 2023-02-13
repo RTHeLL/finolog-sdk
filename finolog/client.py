@@ -1,5 +1,6 @@
 from finolog.services.contractor_service import FinologContractorService
 from finolog.services.document_service import FinologDocumentService
+from finolog.services.requisite_service import FinologRequisiteService
 
 
 class FinologClient:
@@ -11,3 +12,4 @@ class FinologClient:
 
         self.contractor = FinologContractorService(api_token=api_token, biz_id=self.biz_id)
         self.document = FinologDocumentService(api_token=api_token, biz_id=self.biz_id)
+        self.requisite = FinologRequisiteService(api_token=api_token, biz_id=self.biz_id)

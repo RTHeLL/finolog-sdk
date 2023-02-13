@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any, Optional, Dict, Union
 
 from finolog.services.api_service import FinologAPIService
 from finolog.types.contractor_types import Contractor
@@ -59,6 +59,45 @@ class FinologContractorService(FinologAPIService):
         )
 
         return Contractor(**self.request('GET', f'{self.uri}/{str(contractor_id)}'))
+
+    def get_or_create_by_inn(
+            self,
+            inn: str,
+            defaults: Optional[Dict[str, Any]] = None
+    ) -> Union[Contractor, List[Contractor]]:
+        """
+        Returns Contractor object.
+
+        Defaults payload:
+        email: str : Filter by email
+        inn: str : Filter by TIN (ИНН)
+        with: str : Include related entities in the request response (comma-separated list of entities).
+        Types: requisites, debts, autoeditor
+        page: int : Page number
+        pagesize: int : Number of items per page
+        query: str: Search line
+        ids: str : Filter elements by ID (list of id separated by commas)
+        is_bizzed: bool : Filter by counterparties that are business counterparties
+        """
+
+        if defaults:
+            self.validate_payload(
+                payload=defaults,
+                types={
+                    'name': str,
+                    'email': str,
+                    'phone': str,
+                    'person': str,
+                    'description': str
+                }
+            )
+
+        contractors = self.get_contractors(inn=inn)
+
+        if not contractors:
+            return self.create_contractor(defaults['name'], **defaults)
+
+        return contractors
 
     def create_contractor(self, name: str, **payload) -> Contractor:
         """
