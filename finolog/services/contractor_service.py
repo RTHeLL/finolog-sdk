@@ -1,4 +1,4 @@
-from typing import List, Any, Optional, Dict, Union
+from typing import List, Any, Optional, Dict, Union, Tuple
 
 from finolog.services.api_service import FinologAPIService
 from finolog.types.contractor_types import Contractor
@@ -64,7 +64,7 @@ class FinologContractorService(FinologAPIService):
             self,
             inn: str,
             defaults: Optional[Dict[str, Any]] = None
-    ) -> Union[Contractor, List[Contractor]]:
+    ) -> Tuple[Union[Contractor, List[Contractor]], bool]:
         """
         Returns Contractor object.
 
@@ -95,9 +95,9 @@ class FinologContractorService(FinologAPIService):
         contractors = self.get_contractors(inn=inn)
 
         if not contractors:
-            return self.create_contractor(defaults['name'], **defaults)
+            return self.create_contractor(defaults['name'], **defaults), True
 
-        return contractors
+        return contractors, False
 
     def create_contractor(self, name: str, **payload) -> Contractor:
         """
