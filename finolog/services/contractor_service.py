@@ -2,6 +2,7 @@ from typing import List, Any, Optional, Dict, Union, Tuple
 
 from finolog.services.api_service import FinologAPIService
 from finolog.types.contractor_types import Contractor
+from finolog.utils import validate_string_length
 
 
 class FinologContractorService(FinologAPIService):
@@ -43,6 +44,9 @@ class FinologContractorService(FinologAPIService):
                 'is_bizzed': bool
             }
         )
+
+        if 'inn' in payload:
+            validate_string_length('inn', payload['inn'], min_l=10, max_l=12)
 
         if 'is_bizzed' in payload:
             payload['is_bizzed'] = 'true' if payload['is_bizzed'] is True else 'false'
@@ -95,7 +99,7 @@ class FinologContractorService(FinologAPIService):
         contractors = self.get_contractors(inn=inn)
 
         if not contractors:
-            return self.create_contractor(defaults['name'], **defaults), True
+            return self.create_contractor(defaults.pop('name'), **defaults), True
 
         return contractors, False
 
