@@ -1,7 +1,9 @@
 from datetime import date, datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from finolog.types.requisite_types import Requisite
 
 
 class ContractorSummary(BaseModel):
@@ -35,3 +37,4 @@ class Contractor(BaseModel):
     group_id: Optional[int]
     autoeditor_id: Optional[int]
     summary: List[ContractorSummary]
+    requisites: List[Requisite] = Field(default=list())

@@ -22,7 +22,7 @@ class FinologContractorService(FinologAPIService):
         Payload:
         email: str : Filter by email
         inn: str : Filter by TIN (ИНН)
-        with: str : Include related entities in the request response (comma-separated list of entities).
+        with_: str : Include related entities in the request response (comma-separated list of entities).
         Types: requisites, debts, autoeditor
         page: int : Page number
         pagesize: int : Number of items per page
@@ -30,6 +30,9 @@ class FinologContractorService(FinologAPIService):
         ids: str : Filter elements by ID (list of id separated by commas)
         is_bizzed: bool : Filter by counterparties that are business counterparties
         """
+
+        if 'with_' in payload:
+            payload['with'] = payload.pop('with_')
 
         self.validate_payload(
             payload=payload,
@@ -70,18 +73,13 @@ class FinologContractorService(FinologAPIService):
             defaults: Optional[Dict[str, Any]] = None
     ) -> Tuple[Union[Contractor, List[Contractor]], bool]:
         """
-        Returns Contractor object.
+        Returns tuple with Contractor object and bool.
 
         Defaults payload:
-        email: str : Filter by email
-        inn: str : Filter by TIN (ИНН)
-        with: str : Include related entities in the request response (comma-separated list of entities).
-        Types: requisites, debts, autoeditor
-        page: int : Page number
-        pagesize: int : Number of items per page
-        query: str: Search line
-        ids: str : Filter elements by ID (list of id separated by commas)
-        is_bizzed: bool : Filter by counterparties that are business counterparties
+        email: str : Email
+        phone: str : Phone number
+        person: str : The contact person
+        description: str : Description
         """
 
         if defaults:
@@ -96,7 +94,7 @@ class FinologContractorService(FinologAPIService):
                 }
             )
 
-        contractors = self.get_contractors(inn=inn)
+        contractors = self.get_contractors(inn=inn, with_='requisites')
 
         if not contractors:
             return self.create_contractor(defaults.pop('name'), **defaults), True
