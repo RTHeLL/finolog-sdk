@@ -32,11 +32,7 @@ def requirements():
     requirements_list = list()
     with open("requirements.txt") as pc_requirements:
         for install in pc_requirements:
-            module_name = install.split('~=')[0].strip()
-            try:
-                __import__(module_name)
-            except ImportError:
-                requirements_list.append(install.strip())
+            requirements_list.append(install.strip())
     return requirements_list
 
 
