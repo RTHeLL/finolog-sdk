@@ -55,7 +55,11 @@ class FinologContractorService(FinologAPIService):
             payload['is_bizzed'] = 'true' if payload['is_bizzed'] is True else 'false'
 
         response = self.request('GET', self.uri, payload)
-        return [Contractor(**obj) for obj in response]
+
+        try:
+            return [Contractor(**obj) for obj in response]
+        except TypeError:
+            raise TypeError(response)
 
     def get_contractor(self, contractor_id: int) -> Contractor:
         self.validate_payload(
