@@ -1,2 +1,2 @@
-requests~=2.27.1
-pydantic~=1.9.1
+aiohttp~=3.8.4
+pydantic~=1.10.9
