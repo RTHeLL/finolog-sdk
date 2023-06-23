@@ -1,23 +1,22 @@
 from typing import List
 
+from aiohttp import ClientSession
+
 from finolog.services.api_service import FinologAPIService
 from finolog.types.document_types import Document, DocumentPDF
 
 
 class FinologDocumentService(FinologAPIService):
-    def __init__(self, api_token: str, biz_id: int) -> None:
-        super().__init__(api_token)
+    def __init__(self, client: ClientSession, biz_id: int) -> None:
+        super().__init__(client)
 
         if not isinstance(biz_id, int):
-            raise TypeError('biz_id must be a number')
+            raise TypeError("biz_id must be a number")
 
         self.biz_id = biz_id
-        self.uri = f'biz/{self.biz_id}/orders/document'
+        self.uri = f"biz/{self.biz_id}/orders/document"
 
-    def get_documents(
-            self,
-            **payload
-    ) -> List[Document]:
+    async def get_documents(self, **payload) -> List[Document]:
         """
         Returns a list of Document.
 
@@ -32,35 +31,32 @@ class FinologDocumentService(FinologAPIService):
         international - интернациональный шаблон, если kind равен invoice
         stock - отгрузка по остаткам, если kind равен shipment
         asset - отгрузка по средствам, если kind равен shipment
-        """
+        """  # noqa: E501
 
         self.validate_payload(
             payload=payload,
             types={
-                'page': int,
-                'pagesize': int,
-                'query': str,
-                'item_id': int,
-                'kind': str,
-                'template': str
-            }
+                "page": int,
+                "pagesize": int,
+                "query": str,
+                "item_id": int,
+                "kind": str,
+                "template": str,
+            },
         )
 
-        response = self.request('GET', self.uri, payload)
+        response = await self.request("GET", self.uri, payload)
 
         return [Document(**obj) for obj in response]
 
-    def get_document(self, id_: int) -> Document:
-        self.validate_payload(
-            payload={'id': id_},
-            types={
-                'id': int
-            }
+    async def get_document(self, id_: int) -> Document:
+        self.validate_payload(payload={"id": id_}, types={"id": int})
+
+        return Document(
+            **(await self.request("GET", f"{self.uri}/{str(id_)}"))
         )
 
-        return Document(**self.request('GET', f'{self.uri}/{str(id_)}'))
-
-    def get_document_pdf(self, id_: int, **payload) -> DocumentPDF:
+    async def get_document_pdf(self, id_: int, **payload) -> DocumentPDF:
         """
         Returns DocumentPDF object.
 
@@ -69,22 +65,26 @@ class FinologDocumentService(FinologAPIService):
         """
 
         payload_copy = payload.copy()
-        payload_copy['id'] = id_
+        payload_copy["id"] = id_
 
         self.validate_payload(
-            payload=payload_copy,
-            types={
-                'id': int,
-                'no_sign': bool
-            }
+            payload=payload_copy, types={"id": int, "no_sign": bool}
         )
 
-        if 'no_sign' in payload:
-            payload['no_sign'] = 'true' if payload['no_sign'] is True else 'false'
+        if "no_sign" in payload:
+            payload["no_sign"] = (
+                "true" if payload["no_sign"] is True else "false"
+            )
 
-        return DocumentPDF(**self.request('GET', f'{self.uri}/{str(id_)}/pdf/invoice', payload))
+        return DocumentPDF(
+            **(
+                await self.request(
+                    "GET", f"{self.uri}/{str(id_)}/pdf/invoice", payload
+                )
+            )
+        )
 
-    def create_document(self, **payload) -> Document:
+    async def create_document(self, **payload) -> Document:
         """
         Returns a list of FinologDocument.
 
@@ -120,51 +120,53 @@ class FinologDocumentService(FinologAPIService):
                 "item_name": "Мука"
             }
         ]
-        """
+        """  # noqa: E501
 
-        if 'items' not in payload:
-            raise ValueError('items not specified')
+        if "items" not in payload:
+            raise ValueError("items not specified")
 
         self.validate_payload(
             payload=payload,
             types={
-                'kind': str,
-                'vat_type': str,
-                'type': str,
-                'date': str,
-                'template': str,
-                'from_contractor_id': int,
-                'from_requisite_id': int,
-                'to_contractor_id': int,
-                'to_requisite_id': int,
-                'to_contractor_draft': str,
-                'number': str,
-                'status': str,
-                'comment': str,
-                'description': str,
-                'model_type': str,
-                'model_id': int,
-                'items': list
-            }
+                "kind": str,
+                "vat_type": str,
+                "type": str,
+                "date": str,
+                "template": str,
+                "from_contractor_id": int,
+                "from_requisite_id": int,
+                "to_contractor_id": int,
+                "to_requisite_id": int,
+                "to_contractor_draft": str,
+                "number": str,
+                "status": str,
+                "comment": str,
+                "description": str,
+                "model_type": str,
+                "model_id": int,
+                "items": list,
+            },
         )
 
         self.validate_payload(
-            payload=payload['items'],
+            payload=payload["items"],
             types={
-                'id': int,
-                'item_id': int,
-                'count': int,
-                'vat': int,
-                'price': int,
-                'price_currency_id': int,
-                'amortization': int,
-                'item_name': str
-            }
+                "id": int,
+                "item_id": int,
+                "count": int,
+                "vat": int,
+                "price": int,
+                "price_currency_id": int,
+                "amortization": int,
+                "item_name": str,
+            },
         )
 
-        return Document(**self.request('POST', self.uri, payload=payload))
+        return Document(
+            **(await self.request("POST", self.uri, payload=payload))
+        )
 
-    def update_document(self, id_: int, **payload) -> Document:
+    async def update_document(self, id_: int, **payload) -> Document:
         """
         Returns Document object.
 
@@ -185,42 +187,41 @@ class FinologDocumentService(FinologAPIService):
         description: str : Description
         model_type: str : The model to which the document will be bound, for example Order
         model_id: int : ID of the model to which the document will be linked
-        """
+        """  # noqa: E501
 
         payload_copy = payload.copy()
-        payload_copy['id'] = id_
+        payload_copy["id"] = id_
 
         self.validate_payload(
             payload=payload_copy,
             types={
-                'type': str,
-                'kind': str,
-                'date': str,
-                'template': str,
-                'from_contractor_id': int,
-                'from_requisite_id': int,
-                'to_contractor_id': int,
-                'to_requisite_id': int,
-                'to_contractor_draft': str,
-                'number': str,
-                'status': str,
-                'comment': str,
-                'description': str,
-                'model_type': str,
-                'model_id': int
-            }
+                "type": str,
+                "kind": str,
+                "date": str,
+                "template": str,
+                "from_contractor_id": int,
+                "from_requisite_id": int,
+                "to_contractor_id": int,
+                "to_requisite_id": int,
+                "to_contractor_draft": str,
+                "number": str,
+                "status": str,
+                "comment": str,
+                "description": str,
+                "model_type": str,
+                "model_id": int,
+            },
         )
 
-        response = self.request('PUT', f'{self.uri}/{str(id_)}', payload)
+        response = await self.request(
+            "PUT", f"{self.uri}/{str(id_)}", payload
+        )
 
         return Document(**response)
 
-    def delete_document(self, id_: int) -> Document:
-        self.validate_payload(
-            payload={'id': id_},
-            types={
-                'id': int
-            }
-        )
+    async def delete_document(self, id_: int) -> Document:
+        self.validate_payload(payload={"id": id_}, types={"id": int})
 
-        return Document(**self.request('DELETE', f'{self.uri}/{str(id_)}'))
+        return Document(
+            **(await self.request("DELETE", f"{self.uri}/{str(id_)}"))
+        )

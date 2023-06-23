@@ -22,20 +22,21 @@ $ pip install git+https://github.com/RTHeLL/finolog-sdk
 ### Example
 
 ```python
-from finolog.client import FinologClient 
+import asyncio
+from finolog.client import FinologClient
 
 
-def main():
+async def main():
     client = FinologClient(api_token='YOUR TOKEN', biz_id=123)
-    contractors = client.contractor.get_contractors()
-    documents = client.document.get_documents()
-    print(
-        f'Documents: {documents}\n'
-        f'Contractors: {contractors}'
+    contractors, documents = await asyncio.gather(
+        client.contractor.get_contractors(), client.document.get_documents()
     )
+    print(f"Documents: {documents}\n" f"Contractors: {contractors}")
+    await client.close()
 
+if __name__ == "__main__":
+    asyncio.run(main())
 
-main()
 ```
 
 
